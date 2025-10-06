@@ -13,6 +13,11 @@ return new class extends Migration
     {
         Schema::create('clients', function (Blueprint $table) {
             $table->id();
+            $table->string('first_name', 100);
+            $table->string('last_name', 150);
+            $table->string('email', 255)->unique();
+            $table->boolean('status')->default(true);
+            $table->unsignedBigInteger('legacy_id')->nullable()->unique();
             $table->timestamps();
         });
     }
