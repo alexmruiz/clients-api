@@ -7,7 +7,11 @@ use Illuminate\Support\Facades\DB;
 class ClientService
 {
     /**
-     * Obtener clientes con paginación y filtrado opcional por status.
+     * Summary of getClients
+     * @param mixed $status
+     * @param int $perPage
+     * @param int $page
+     * @return array{clients: array, total: mixed}
      */
     public function getClients(?int $status, int $perPage, int $page): array
     {
@@ -19,11 +23,11 @@ class ClientService
             $bindings[] = $status;
         }
 
-        // Contar resultados totales
+        // Count results totales
         $countSql = str_replace('SELECT *', 'SELECT COUNT(*) AS total', $sql);
         $total = DB::selectOne($countSql, $bindings)->total;
 
-        // Paginación
+        // Pagination
         $offset = ($page - 1) * $perPage;
         $sql .= " LIMIT ? OFFSET ?";
         $bindings[] = $perPage;
@@ -38,7 +42,9 @@ class ClientService
     }
 
     /**
-     * Crear un nuevo cliente.
+     * Create a new client.
+     * @param array $data
+     * @return void
      */
     public function createClient(array $data): void
     {
@@ -58,7 +64,8 @@ class ClientService
     }
 
     /**
-     * Obtener un cliente por ID.
+     * Get a client by ID.
+     * @param int $id
      */
     public function getClient(int $id)
     {
@@ -67,7 +74,10 @@ class ClientService
     }
 
     /**
-     * Actualizar un cliente por ID.
+     * Update a client by ID with provided data.
+     * @param int $id
+     * @param array $data
+     * @return bool
      */
     public function updateClient(int $id, array $data): bool
     {
@@ -96,7 +106,9 @@ class ClientService
     }
 
     /**
-     * Eliminar un cliente por ID.
+     * Delete a client by ID.
+     * @param int $id
+     * @return bool
      */
     public function deleteClient(int $id): bool
     {
