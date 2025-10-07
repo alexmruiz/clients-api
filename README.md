@@ -1,61 +1,64 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🧩 Migración y Modernización del Módulo de Clientes
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## 📄 Descripción
 
-## About Laravel
+Este proyecto simula la migración de un pequeño CRM legacy (PHP plano) hacia una plataforma moderna compuesta por una **API en Laravel** y, opcionalmente, un **frontend en Next.js**.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+El objetivo principal es trasladar la gestión de clientes garantizando **control, seguridad y previsibilidad** en las operaciones sobre la base de datos.  
+**No se utiliza ningún ORM (como Eloquent)**; todas las consultas se escriben en **SQL nativo** usando el facade `DB` de Laravel (`DB::select`, `DB::insert`, `DB::update`, `DB::delete`) y **bindings** para prevenir inyección SQL.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+---
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## 🧱 Componentes principales
 
-## Learning Laravel
+### 🗂 Legacy Endpoint
+El archivo `legacy_clients.php` se encuentra en la carpeta `/legacy`, dentro del directorio principal del proyecto.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+Incluye un modo `?format=json` que:
+- Exporta los clientes sin datos sensibles (por ejemplo, `password_hash`).
+- Divide el campo `full_name` en `first_name` y `last_name`.
+- Facilita la importación en el nuevo sistema moderno mediante el comando Artisan.
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+---
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### ⚙️ API Laravel
+- **Migración:** tabla `clients` con los campos:
+  - `id`, `first_name`, `last_name`, `email`, `status` (o `active`), `legacy_id`, `created_at`, `updated_at`
+- **Controlador REST:** gestiona las peticiones HTTP.
+- **FormRequest:** valida las entradas antes de llegar al servicio.
+- **ClientService:** contiene las consultas SQL nativas y la lógica de negocio.
 
-## Laravel Sponsors
+---
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### 🧭 Comando Artisan
+`php artisan import:legacy-clients`
 
-### Premium Partners
+- Sincroniza los clientes desde el endpoint legacy.
+- Para cada cliente recibido:
+  - Comprueba si ya existe por `legacy_id`.
+  - Inserta o actualiza según corresponda.
+- Usa **transacciones** y es **idempotente** (puede ejecutarse varias veces sin duplicar datos).
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+---
 
-## Contributing
+### 🧪 Tests y documentación
+- Los tests de **feature y unitarios** se encuentran en la carpeta `/tests` y **cubren todos los métodos** del servicio (`ClientService`) y del controlador (`ClientController`).
+- En la carpeta `/docs` se incluye:
+  - Una **colección de Postman** para probar los endpoints manualmente.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+---
 
-## Code of Conduct
+## 💡 Principios de diseño
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+- **Seguridad:** todas las consultas usan placeholders (`?`) y bindings → evita inyección SQL.
+- **Claridad y separación:**  
+  - El controlador solo orquesta.  
+  - El `ClientService` accede a los datos.  
+  - El comando Artisan delega la lógica de importación.
+- **Timestamps y datos legacy:**  
+  - `created_at` se preserva desde el legacy cuando existe.  
+  - `updated_at` se inicializa en `NULL` y solo se modifica al actualizar registros.
+- **Idempotencia y transacciones:**  
+  Cada inserción/actualización se ejecuta dentro de una transacción para mantener la consistencia del sistema.
 
-## Security Vulnerabilities
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).

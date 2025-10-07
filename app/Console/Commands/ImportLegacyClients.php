@@ -39,11 +39,11 @@ class ImportLegacyClients extends Command
      */
     public function handle()
     {
-        $this->info('Iniciando importación de clientes legacy...');
+        $this->info('Initiating legacy client import...');
 
         try {
             // Call HTTP to legacy endpoint
-            $response = Http::get('http://localhost/legacy_clientes.php', [
+            $response = Http::get('http://localhost/legacy_clients.php', [
                 'format' => 'json'
             ]);
         } catch (\Exception $e) {
