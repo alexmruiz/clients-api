@@ -6,12 +6,13 @@ use Illuminate\Support\Facades\Route;
 
 //======================= GET =======================
 Route::get('/clients', [ClientController::class, 'index']);
+
 Route::get('/clients/{id}', [ClientController::class, 'show']);
 
 //======================= POST ======================
 Route::post('/clients', [ClientController::class, 'store']);
 
-//======================= PUT ======================
+//======================= PUT =======================
 Route::put('/clients/{id}', [ClientController::class, 'update']);
 
 //======================= DELETE ======================

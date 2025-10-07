@@ -29,13 +29,12 @@ class ClientRequest extends FormRequest
             'legacy_id'  => 'nullable|integer',
         ];
 
-        // En actualización,  mantener el mismo email
+        // For update requests, ignore the unique rule for the current client
         if ($this->isMethod('put') || $this->isMethod('patch')) {
             $clientId = $this->route('client');
-            $rules['email'] = 'required|email|max:150|unique:clients,email,' . $clientId;
+            $rules['email'] = 'sometimes|email|max:150|unique:clients,email,' . $clientId;
         }
 
         return $rules;
-    
     }
 }

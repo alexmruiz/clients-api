@@ -10,6 +10,10 @@ use Illuminate\Http\JsonResponse;
 
 class ClientController extends Controller
 {
+    /**
+     * Summary of service
+     * @var ClientService
+     */
     protected ClientService $service;
 
     public function __construct(ClientService $service)
@@ -90,7 +94,7 @@ class ClientController extends Controller
         if (!$updated) {
             return response()->json([
                 'success' => false,
-                'message' => 'No fields to update'
+                'message' => 'No fields to update or client not found'
             ], 400);
         }
 

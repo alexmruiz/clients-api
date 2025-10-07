@@ -57,8 +57,8 @@ class ClientService
                 $data['email'],
                 $data['status'] ?? 1,
                 $data['legacy_id'] ?? null,
-                now(),
-                now()
+                $data['created_at'] ?? now(),
+                null
             ]
         );
     }
@@ -81,22 +81,33 @@ class ClientService
      */
     public function updateClient(int $id, array $data): bool
     {
-        $fields = [];
-        $bindings = [];
-
-        foreach (['first_name', 'last_name', 'email', 'status', 'legacy_id'] as $key) {
-            if (isset($data[$key])) {
-                $fields[] = "$key = ?";
-                $bindings[] = $data[$key];
-            }
-        }
-
-        if (empty($fields)) {
+        // Check if client exists
+        $exists = DB::selectOne("SELECT id FROM clients WHERE id = ?", [$id]);
+        if (!$exists) {
             return false;
         }
 
+        // Only allow certain fields to be updated
+        $allowed = ['first_name', 'last_name', 'email', 'status', 'legacy_id'];
+        $fieldsToUpdate = array_intersect_key($data, array_flip($allowed));
+
+        if (empty($fieldsToUpdate)) {
+            return false;
+        }
+
+        // Build the SQL dynamically
+        $fields = [];
+        $bindings = [];
+        foreach ($fieldsToUpdate as $key => $value) {
+            $fields[] = "$key = ?";
+            $bindings[] = $value;
+        }
+
+        // update updated_at
         $fields[] = "updated_at = ?";
         $bindings[] = now();
+
+        // ID para el WHERE
         $bindings[] = $id;
 
         $sql = "UPDATE clients SET " . implode(', ', $fields) . " WHERE id = ?";
@@ -114,5 +125,44 @@ class ClientService
     {
         $deleted = DB::delete("DELETE FROM clients WHERE id = ?", [$id]);
         return $deleted > 0;
+    }
+
+    /**
+     * Summary of syncLegacyClients
+     * @param array $legacyClients
+     * @return int
+     */
+    public function syncLegacyClients(array $legacyClients): int
+    {
+        $count = 0;
+
+        foreach ($legacyClients as $client) {
+            DB::transaction(function () use ($client, &$count) {
+                // To check if it already exists
+                $existing = DB::selectOne(
+                    "SELECT id FROM clients WHERE legacy_id = ?",
+                    [$client['legacy_id']]
+                );
+
+                $data = [
+                    'first_name' => $client['first_name'],
+                    'last_name'  => $client['last_name'],
+                    'email'      => $client['email'],
+                    'created_at' => $client['created_at'],
+                    'legacy_id'  => $client['legacy_id'],
+                ];
+
+                if ($existing) {
+                    // Update using ClientService
+                    $this->updateClient($existing->id, $data);
+                } else {
+                    // Insert using ClientService
+                    $this->createClient($data);
+                }
+
+                $count++;
+            });
+        }
+        return $count;
     }
 }
