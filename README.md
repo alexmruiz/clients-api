@@ -90,7 +90,8 @@ Levantar el servidor de desarrollo:
  npm run dev
 
 La aplicación estará disponible en http://localhost:3000
-.
+
+---
 
 ## ⚙️ Instalación y puesta en marcha de la API Laravel
 
