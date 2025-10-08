@@ -2,7 +2,7 @@
 
 ## 📄 Descripción
 
-Este proyecto simula la migración de un pequeño CRM legacy (PHP plano) hacia una plataforma moderna compuesta por una **API en Laravel** y, opcionalmente, un **frontend en Next.js**.
+Este proyecto simula la migración de un pequeño CRM legacy (PHP plano) hacia una plataforma moderna compuesta por una **API en Laravel** y un **frontend en Next.js**.
 
 El objetivo principal es trasladar la gestión de clientes garantizando **control, seguridad y previsibilidad** en las operaciones sobre la base de datos.  
 **No se utiliza ningún ORM (como Eloquent)**; todas las consultas se escriben en **SQL nativo** usando el facade `DB` de Laravel (`DB::select`, `DB::insert`, `DB::update`, `DB::delete`) y **bindings** para prevenir inyección SQL.
@@ -62,7 +62,36 @@ Incluye un modo `?format=json` que:
   Cada inserción/actualización se ejecuta dentro de una transacción para mantener la consistencia del sistema.
 
 
-## ⚙️ Instalación y puesta en marcha
+## 💻 Frontend Next.js
+
+El frontend de este proyecto está disponible en:
+
+https://github.com/alexmruiz/front-clients.git
+
+Es una aplicación Next.js que consume la API de Laravel para mostrar, crear, actualizar y eliminar clientes.
+
+⚡ Instalación rápida del frontend
+
+Clonar el repositorio:
+
+git clone https://github.com/alexmruiz/front-clients.git
+
+cd front-clients
+
+---
+
+Instalar dependencias:
+
+ npm install
+
+Levantar el servidor de desarrollo:
+
+ npm run dev
+
+La aplicación estará disponible en http://localhost:3000
+.
+
+## ⚙️ Instalación y puesta en marcha de la API Laravel
 
 Sigue estos pasos para levantar el proyecto en tu entorno local:
 
