@@ -61,6 +61,7 @@ Incluye un modo `?format=json` que:
 - **Idempotencia y transacciones:**  
   Cada inserción/actualización se ejecuta dentro de una transacción para mantener la consistencia del sistema.
 
+---
 
 ## 💻 Frontend Next.js
 
