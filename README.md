@@ -79,8 +79,6 @@ git clone https://github.com/alexmruiz/front-clients.git
 
 cd front-clients
 
----
-
 Instalar dependencias:
 
  npm install
